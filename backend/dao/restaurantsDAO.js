@@ -79,7 +79,7 @@ export default class RestaurantsDAO {
                         },
                         pipeline: [
                             {
-                                $match: { // get the restaurants that match the id + the related reviews
+                                $match: { // get the restaurants that match the id + the related reviews -> all the reviews that match restaurant id
                                     $expr: {
                                         $eq: ["$restaurant_id", "$$id"],
                                     }
@@ -103,14 +103,13 @@ export default class RestaurantsDAO {
             return await restaurants.aggregate(pipeline).next()
         }
         catch (e){
-            console.error(`Unable to get item with the given id while performing the getRestaurantById method : ${e}`)
+            console.error(`Unable to get item with the given id while performing the getRestaurantById method in DAO : ${e}`)
             return {restaurantList: [], totalNumbersOfRestaurants : 0}
         }
     }
 
     static async getCuisines () { // will be used to populate the frontend dropdown that allow user to sort by cuisines
         let cuisines = []
-
         try {
             cuisines = await restaurants.distinct("cuisine") // prevent getting double results
             return cuisines

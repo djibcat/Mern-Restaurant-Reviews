@@ -25,6 +25,6 @@ MongoClient.connect( // connect to database with parameters listed in the dotenv
         await RestaurantsDAO.injectDB(client)
         await ReviewsDAO.injectDB(client)
         app.listen(port, () => {
-            console.log(`listening on port ${port}`)
+            console.log(`Listening on port ${port}`)
         })
     })
