@@ -1,43 +1,50 @@
 import React, { useEffect, useState } from "react";
 import RestaurantDataService from "../services/RestaurantDataService.js"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import {Row, Col, Form, Input, Label, Button, InputGroup, Card, CardBody, CardTitle, CardSubtitle, CardGroup} from "reactstrap"
 
 const  RestaurantList = props => {
+    let navigate = useNavigate();
 
-    let navigate = useNavigate()
-    const [ restaurants, setRestaurants ] = useState([]);
-    const [ searchName, setSearchName ] = useState("");
-    const [ searchZip, setSearchZip ] = useState("");
-    const [ searchCuisine, setSearchCuisine ] = useState("");
-    const [ cuisines, setCuisines ] = useState(["All Cuisines"]);
+    const [restaurants, setRestaurants] = useState([]);
+    const [searchName, setSearchName] = useState("");
+    const [searchZip, setSearchZip] = useState("");
+    const [searchCuisine, setSearchCuisine] = useState("");
+    const [cuisines, setCuisines] = useState(["All Cuisines"]);
+    const [selectedCuisine, setSelectedCuisine] = useState("");
 
-    useEffect(async () =>{
-        await retrieveRestaurants();
-        await retrieveCuisines()
-    }, [])
+    const redirectOnError = () => {
+        navigate("/error");
+    };
+
+    useEffect( () => {
+        async function fetchData ()  {
+            await retrieveRestaurants();
+            await retrieveCuisines();
+        }
+         fetchData();// eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const retrieveRestaurants = async () => {
-        try{
-            const response = await RestaurantDataService.getAllRestaurants()
-            response && console.log(response.data.restaurants)
-            response && setRestaurants(response.data.restaurants)
-        }catch(e){
+        try {
+            const response = await RestaurantDataService.getAllRestaurants();
+            response && console.log(response.data.restaurants);
+            response && setRestaurants(response.data.restaurants);
+        } catch (e) {
             console.error(`Something went wrong while retrieving restaurants : ${e} `)
-            //navigate("/error")
+            redirectOnError()
         }
-
-    }
-    const retrieveCuisines = async() => {
-        try{
-            const response = await RestaurantDataService.getAllCuisines()
-            response && console.log(response.data)
-            response && setCuisines(["All Cuisines"].concat(response.data))
-        }
-        catch(e){
+    };
+    const retrieveCuisines = async () => {
+        try {
+            const response = await RestaurantDataService.getAllCuisines();
+            response && console.log(response.data);
+            response && setCuisines(["All Cuisines"].concat(response.data));
+        } catch (e) {
             console.error(`Something went wrong while retrieving cuisines : ${e} `)
-            //navigate("/error")
+            redirectOnError()
         }
-    }
+    };
 
     const refreshList = async () => {
         await retrieveRestaurants();
@@ -45,28 +52,31 @@ const  RestaurantList = props => {
 
     const onChangeSearchName = e => {
         const inputName = e.target.value;
+        console.log(inputName)
         setSearchName(inputName);
     }
 
     const onChangeSearchZip = e => {
         const inputZipCode = e.target.value;
+        console.log(inputZipCode)
         setSearchZip(inputZipCode)
     }
 
     const onChangeSearchCuisine = e => {
+        setSelectedCuisine(e.target.value)
         const inputCuisine = e.target.value;
+        console.log(inputCuisine)
         setSearchCuisine(inputCuisine)
     }
 
-    const search = async ( query, by ) => {
-        try{
+    const search = async (query, by) => {
+        try {
             const response = await RestaurantDataService.find(query, by);
             response && console.log(response.data)
             response && setRestaurants(response.data.restaurants)
-        }
-        catch(e){
+        } catch (e) {
             console.error(`Something went wrong while searching for restaurant : ${e} `)
-            //navigate("/error")
+            redirectOnError()
         }
     }
 
@@ -74,16 +84,118 @@ const  RestaurantList = props => {
         await search(searchName, "name")
     }
 
-    const findByZip = async () => {
+    const searchByZip = async () => {
         await search(searchZip, "zipcode")
     }
 
+    const searchByCuisine = async () => {
+        if (searchCuisine === "All Cuisines") {
+            await refreshList()
+        } else {
+            await search(searchCuisine, "cuisine")
+        }
+    }
 
-    return(
-        <div>
-            Restaurant List
-        </div>
+    const handleRestaurantReviewClick = (restaurantId) => {
+        if (restaurantId) {
+            navigate(`/restaurants/${restaurantId}`)
+        } else return
+    }
+
+    return (
+        <>
+            <Form>
+                <Row>
+                    <Col>
+                        <Label>Search by name</Label>
+                        <InputGroup>
+                            <Input
+                                name="name"
+                                type="text"
+                                placeholder="Pizza Mama"
+                                value={searchName}
+                                onChange={onChangeSearchName}
+                            />
+                            <Button onClick={searchByName}>
+                                Search
+                            </Button>
+                        </InputGroup>
+                    </Col>
+                    <Col>
+                        <Label>Search by zipcode</Label>
+                        <InputGroup>
+                            <Input
+                                name="zipcode"
+                                type="number"
+                                placeholder="11234"
+                                value={searchZip}
+                                onChange={onChangeSearchZip}
+                            />
+                            <Button onClick={searchByZip}>
+                                Search
+                            </Button>
+                        </InputGroup>
+                    </Col>
+
+                    <Col>
+                        <Label>Search by type of Cuisines</Label>
+                        <InputGroup>
+                            <Input
+                                name="cuisines"
+                                type="select"
+                                placeholder="Italian"
+                                value={selectedCuisine}
+                                onChange={onChangeSearchCuisine}>
+                                {cuisines && cuisines.map((cuisine, index) => (
+                                    <option value={cuisine} key={index}>{cuisine.substr(0, 20)}</option>
+                                ))}
+                            </Input>
+
+                            <Button onClick={searchByCuisine}>
+                                Search
+                            </Button>
+                        </InputGroup>
+                    </Col>
+                </Row>
+            </Form>
+
+            <Row className="mt-5">
+                {
+                    restaurants && restaurants.map((restaurant, index) => {
+                        const address = `${restaurant.address.building} ${restaurant.address.street} ${restaurant.address.zipcode}`
+                        return (
+                            <Col>
+                                <CardGroup>
+                                <Card key={index} style={{width:"20rem", height:"15rem"}} className={"mb-5"}>
+                                    <CardBody>
+                                        <CardTitle tag="h5" className={"mb-5"}>
+                                            {restaurant.name}
+                                        </CardTitle>
+                                        <CardSubtitle
+                                            className="text-muted mb-4"
+                                            tag="h6"
+                                        >
+                                            Cuisine : {restaurant.cuisine}<br/>
+                                            Address : {address}
+                                        </CardSubtitle>
+                                        <div className={"mt-5"}>
+                                            <Button onClick={() => handleRestaurantReviewClick(restaurant._id)} style={{marginRight:"1rem"}}>
+                                                See more
+                                            </Button>
+                                            <Button className="ml-2" onClick={() => window.open(`https://www.google.com/maps/place/${address}`)}>
+                                                View map
+                                            </Button>
+                                        </div>
+
+                                    </CardBody>
+                                </Card>
+                                </CardGroup>
+                            </Col>
+                        )
+                    })
+                }
+            </Row>
+        </>
     )
 }
-
 export default RestaurantList
