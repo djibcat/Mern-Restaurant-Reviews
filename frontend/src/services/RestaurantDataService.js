@@ -22,8 +22,8 @@ class RestaurantDataService {
         return http.put("/review", data)
     }
 
-    deleteReview(id){
-        return http.delete(`/review?id=${id}`)
+    deleteReview(review_id, user_id){
+        return http.delete(`/review?id=${review_id}`, {data:{_id:review_id,user_id : user_id}})
     }
 
     getAllCuisines(id){

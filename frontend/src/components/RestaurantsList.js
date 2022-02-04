@@ -18,17 +18,15 @@ const  RestaurantList = props => {
     };
 
     useEffect( () => {
-        async function fetchData ()  {
+        (async function fetchData ()  {
             await retrieveRestaurants();
             await retrieveCuisines();
-        }
-         fetchData();// eslint-disable-next-line react-hooks/exhaustive-deps
+        })()                            // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const retrieveRestaurants = async () => {
         try {
             const response = await RestaurantDataService.getAllRestaurants();
-            response && console.log(response.data.restaurants);
             response && setRestaurants(response.data.restaurants);
         } catch (e) {
             console.error(`Something went wrong while retrieving restaurants : ${e} `)
@@ -38,7 +36,6 @@ const  RestaurantList = props => {
     const retrieveCuisines = async () => {
         try {
             const response = await RestaurantDataService.getAllCuisines();
-            response && console.log(response.data);
             response && setCuisines(["All Cuisines"].concat(response.data));
         } catch (e) {
             console.error(`Something went wrong while retrieving cuisines : ${e} `)
@@ -52,27 +49,23 @@ const  RestaurantList = props => {
 
     const onChangeSearchName = e => {
         const inputName = e.target.value;
-        console.log(inputName)
         setSearchName(inputName);
     }
 
     const onChangeSearchZip = e => {
         const inputZipCode = e.target.value;
-        console.log(inputZipCode)
         setSearchZip(inputZipCode)
     }
 
     const onChangeSearchCuisine = e => {
         setSelectedCuisine(e.target.value)
         const inputCuisine = e.target.value;
-        console.log(inputCuisine)
         setSearchCuisine(inputCuisine)
     }
 
     const search = async (query, by) => {
         try {
             const response = await RestaurantDataService.find(query, by);
-            response && console.log(response.data)
             response && setRestaurants(response.data.restaurants)
         } catch (e) {
             console.error(`Something went wrong while searching for restaurant : ${e} `)
@@ -162,11 +155,11 @@ const  RestaurantList = props => {
             <Row className="mt-5">
                 {
                     restaurants && restaurants.map((restaurant, index) => {
-                        const address = `${restaurant.address.building} ${restaurant.address.street} ${restaurant.address.zipcode}`
+                        const address = `${restaurant.address.building} ${restaurant.address.street} ${restaurant.address.zipcode} ${restaurant.borough}`
                         return (
-                            <Col>
+                            <Col key={index}>
                                 <CardGroup>
-                                <Card key={index} style={{width:"20rem", height:"15rem"}} className={"mb-5"}>
+                                <Card  style={{width:"20rem", height:"15rem"}} className={"mb-5"}>
                                     <CardBody>
                                         <CardTitle tag="h5" className={"mb-5"}>
                                             {restaurant.name}
@@ -175,12 +168,17 @@ const  RestaurantList = props => {
                                             className="text-muted mb-4"
                                             tag="h6"
                                         >
-                                            Cuisine : {restaurant.cuisine}<br/>
-                                            Address : {address}
+                                            <p>
+                                                <u>Cuisine</u> : {restaurant.cuisine}
+                                            </p>
+                                            <p>
+                                                <u>Address</u> : {address}
+                                            </p>
+
                                         </CardSubtitle>
                                         <div className={"mt-5"}>
                                             <Button onClick={() => handleRestaurantReviewClick(restaurant._id)} style={{marginRight:"1rem"}}>
-                                                See more
+                                                Reviews
                                             </Button>
                                             <Button className="ml-2" onClick={() => window.open(`https://www.google.com/maps/place/${address}`)}>
                                                 View map

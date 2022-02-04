@@ -10,7 +10,6 @@ export default class ReviewsController {
                 name: req.body.name,
                 _id: req.body.user_id
             }
-
             const date = new Date()
 
             const ReviewResponse = await ReviewsDAO.addReview(
@@ -54,20 +53,20 @@ export default class ReviewsController {
 
     static async apiDeleteReview(req, res, next) {
         try{ // not suitable for proper production, authentification needed in real world
-            const reviewId = req.body.id
+            const reviewId = req.query.id
             const userId = req.body.user_id
 
             const reviewResponse = await ReviewsDAO.deleteReview(
                 reviewId,
                 userId,
             )
-            console.log(`reviewId: ${reviewId} userId : ${userId}`)
 
             if(reviewId){
                 res.json({status : " success"})
             } else {
                 throw new Error(`Cannot find the reviews linked to this id`)
             }
+            return reviewResponse
         }catch(e){
             res.status(500).json({error: e.message})
         }
