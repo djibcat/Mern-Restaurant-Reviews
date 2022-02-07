@@ -1,13 +1,12 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import RestaurantDataService from "../services/RestaurantDataService";
-import {useNavigate, Link, useParams} from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { Card, Button, CardTitle, CardText, Container } from "reactstrap"
 import moment from 'moment';
 moment().format();
 
-
-const  Restaurant = (props) => {
-    const [restaurant, setRestaurant] = useState({
+const  Restaurant = ( props ) => {
+    const [ restaurant, setRestaurant ] = useState({
         id: null,
         name: "",
         address: {},
@@ -40,8 +39,7 @@ const  Restaurant = (props) => {
 
     const deleteReview = async (reviewId, userId,index) => {
         try{
-            const response = await RestaurantDataService.deleteReview( reviewId, userId)
-            response && console.log(response)
+            const response = await RestaurantDataService.deleteReview( reviewId, userId )
             response && setRestaurant((prevState) => {
                 prevState.reviews.splice( index,1 )
                 return({
@@ -58,8 +56,7 @@ const  Restaurant = (props) => {
         navigate(`/restaurants/${reviewId}/review`)
     }
 
-
-    return(
+    return (
         <>
             {restaurant ? (
                 <div>
@@ -85,18 +82,13 @@ const  Restaurant = (props) => {
                                     </CardText>
                                     { props.user && props.user.id === review.user_id &&
                                         <div>
-                                            <Link to={{
-                                                pathname:`/restaurants/${id}/review`,
-                                                state:{ currentReview: review}}}
+                                            <Link to={`/restaurants/${id}/review`} state={{currentReview: review}}
                                                   style={{marginRight:"0.5rem"}}>
-                                                <Button size={"sm"}>Edit</Button>
+                                                <Button size={"sm"} onClick={()=>console.log(review._id)}>Edit</Button>
                                             </Link>
                                             <Button onClick={() => deleteReview(review._id, props.user.id, index)} size={"sm"}>Delete</Button>
                                         </div>
-
-
                                     }
-
                                 </Card>
                             )
                         })

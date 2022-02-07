@@ -29,7 +29,7 @@ export default class ReviewsController {
             const reviewId = req.body.review_id
             const text = req.body.text
             const date = new Date()
-
+            console.log("reviewId = ", reviewId)
             const reviewResponse = await ReviewsDAO.updateReview(
                 reviewId,
                 req.body.user_id, // to check if the user trying to update is the author of the review
